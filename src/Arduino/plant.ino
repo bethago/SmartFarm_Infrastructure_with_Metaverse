@@ -24,7 +24,7 @@ extern "C"
 #define MOIST1PIN 32
 #define MOIST2PIN 33
 
-#define MQTT_HOST ""
+#define MQTT_HOST "127.0.0.1"
 #define MQTT_PORT 1883
 
 #define JSON_CONFIG_FILE "/config.json"

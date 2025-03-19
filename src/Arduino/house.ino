@@ -23,7 +23,7 @@ extern "C"
 #define FANPINH 26
 #define FANPIN 27
 
-#define MQTT_HOST ""
+#define MQTT_HOST "127.0.0.1"
 #define MQTT_PORT 1883
 
 char allFanTopic[128] = {};
