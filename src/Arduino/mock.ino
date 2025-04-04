@@ -1,13 +1,14 @@
-#include <WiFi.h>
-#include <HTTPClient.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
 #include <time.h>
 
 
-const char* ssid = "YOUR_SSID";
-const char* password = "YOUR_PASSWORD";
-const char* timeServer = "http://192.168.0.1:3001/time";
-const char* tinyiot = "http://192.168.0.1:3000/TinyIoT/house/sunshine";
+const char* ssid = "seslab_5G";
+const char* password = "sejong703";
+const char* timeServer = "http://192.168.0.6:3001/time";
+const char* tinyiot = "http://192.168.0.6:3000/TinyIoT/house/sunshine";
+long offset = 0;
 
 void setup() {
     Serial.begin(115200);
@@ -37,7 +38,7 @@ void setup() {
         deserializeJson(resDoc, response);
         unsigned long t2 = resDoc["t2"];
         unsigned long t3 = resDoc["t3"];
-        long offset = ((long)(t2 - t1) + (long)(t3 - t4)) / 2;
+        offset = ((long)(t2 - t1) + (long)(t3 - t4)) / 2;
         Serial.printf("ESP-TinyIoT 시간 offset: %ld ms\n", offset);
     } else {
         Serial.println("시간 동기화 요청 실패");
