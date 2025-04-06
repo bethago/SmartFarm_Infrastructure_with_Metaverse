@@ -3,7 +3,6 @@
 #include <ArduinoJson.h>
 #include <time.h>
 
-
 const char* ssid = "seslab_5G";
 const char* password = "sejong703";
 const char* timeServer = "http://192.168.0.6:3001/time";
@@ -50,7 +49,7 @@ void loop() {
     if (WiFi.status() == WL_CONNECTED) {
         HTTPClient http;
         WiFiClient client;
-        int value = random(0, 4096);
+        //int value = random(0, 4096);
         http.begin(client, tinyiot);
         http.addHeader("Accept", "application/json");
         http.addHeader("Content-Type", "application/json;ty=4");
@@ -58,7 +57,7 @@ void loop() {
         http.addHeader("X-M2M-RI", "test");
         http.addHeader("X-M2M-RVI", "2a");
         unsigned long esp_ms = millis() + offset;
-        String body = "{\"m2m:cin\": {\"con\": \"" + String(esp_ms) + "/" + String(value) + "\"}}";
+        String body = "{\"m2m:cin\": {\"con\": \"" + String(esp_ms) + "\"}}";
         int httpCode = http.POST(body);
         Serial.println("Response code: " + String(httpCode));
         http.end();
