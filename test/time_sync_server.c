@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <inttypes.h>  // ← 추가
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -14,7 +15,6 @@
 
 #define PORT 3001
 
-// 현재 UTC 시간 (밀리초 단위)
 uint64_t get_current_utc_ms() {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
@@ -67,16 +67,16 @@ int main() {
         uint64_t t2 = get_current_utc_ms();
         uint64_t t3 = get_current_utc_ms();
 
-        sprintf(response,
+        snprintf(response, sizeof(response),
             "HTTP/1.1 200 OK\r\n"
             "Content-Type: application/json\r\n\r\n"
-            "{\"t2\": %llu, \"t3\": %llu}\n",
+            "{\"t2\": %" PRIu64 ", \"t3\": %" PRIu64 "}\n",
             t2, t3);
 
         send(client_fd, response, strlen(response), 0);
         close(client_fd);
 
-        printf("✓ 응답 완료 | t2(ms)=%llu, t3(ms)=%llu\n", t2, t3);
+        printf("✓ 응답 완료 | t2(ms)=%" PRIu64 ", t3(ms)=%" PRIu64 "\n", t2, t3);
     }
 
     close(server_fd);
