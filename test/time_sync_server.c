@@ -6,7 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdint.h>
-#include <inttypes.h>
+#include <inttypes.h>  // ← 추가
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
