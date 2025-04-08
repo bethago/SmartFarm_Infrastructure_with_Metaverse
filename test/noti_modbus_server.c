@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
@@ -8,7 +9,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-#define SERVER_IP "192.168.0.31"
+#define SERVER_IP "192.168.0.69"
 #define SERVER_PORT 3002
 
 uint64_t current_time_ms() {
@@ -59,7 +60,7 @@ int main() {
         uint64_t t1 = current_time_ms();
         send_http_post(value, t1);
         value = 1 - value;
-        usleep(200000);
+        sleep(2);
     }
     return 0;
 }
