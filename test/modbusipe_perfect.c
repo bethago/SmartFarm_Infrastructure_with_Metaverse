@@ -1,7 +1,6 @@
-
-// Compile with: gcc -o modbusipe modbusipe_perfect.c -lmodbus -lmicrohttpd -lcurl -lpthread
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
@@ -42,6 +41,12 @@ Register registers[] = {
     {NULL, NULL, 0, 0, 0, 0}
 };
 
+uint64_t current_time_ms() {
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return (uint64_t)(ts.tv_sec) * 1000 + (ts.tv_nsec / 1000000);
+}
+
 void reconnect_modbus() {
     if (ctx) modbus_close(ctx);
     ctx = modbus_new_rtu(SERIAL_PORT, BAUDRATE, 'N', 8, 1);
@@ -61,13 +66,10 @@ int write_coil(int address, int value) {
     return modbus_write_bit(ctx, address, value);
 }
 
-void log_discharging_data(long t1, long tr, int value) {
-    long t2 = (long)(time(NULL) * 1000);
-    usleep(10000);
-    long t3 = (long)(time(NULL) * 1000);
+void log_discharging_data(uint64_t t1, uint64_t tr, uint64_t t2, uint64_t t3, int value) {
     FILE *f = fopen("time_data.csv", "a");
     if (f) {
-        fprintf(f, "%ld,%ld,%ld,%ld,%d\n", t1, t2, t3, tr, value);
+        fprintf(f, "%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%d\n", t1, t2, t3, tr, value);
         fclose(f);
     }
 }
@@ -155,6 +157,8 @@ int handle_request(void *cls, struct MHD_Connection *connection,
 
     if (strcmp(method, "POST") != 0) return MHD_NO;
 
+    uint64_t tr = current_time_ms();
+
     if (*upload_data_size > 0) {
         buffer = realloc(buffer, *upload_data_size + 1);
         memcpy(buffer, upload_data, *upload_data_size);
@@ -173,9 +177,11 @@ int handle_request(void *cls, struct MHD_Connection *connection,
 
             if (charging) write_coil(0x0000, charging->valueint);
             if (discharging && t1json) {
+                uint64_t t2 = current_time_ms();
                 write_coil(0x0002, discharging->valueint);
-                long tr = (long)(time(NULL) * 1000);
-                log_discharging_data(t1json->valuedouble, tr, discharging->valueint);
+                uint64_t t3 = current_time_ms();
+                log_discharging_data((uint64_t)t1json->valuedouble, tr, t2, t3, discharging->valueint);
+                printf("discharging: %d\n", discharging->valueint);
             }
             cJSON_Delete(root);
         } else if (strcmp(url, "/reconnect") == 0) {
@@ -200,7 +206,7 @@ int handle_request(void *cls, struct MHD_Connection *connection,
 
 int main() {
     reconnect_modbus();
-    pthread_create(&monitor_thread, NULL, monitor_function, NULL);
+    // pthread_create(&monitor_thread, NULL, monitor_function, NULL);
     struct MHD_Daemon *daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY, PORT, NULL, NULL, &handle_request, NULL, MHD_OPTION_END);
     if (!daemon) {
         fprintf(stderr, "HTTP server failed to start\n");
